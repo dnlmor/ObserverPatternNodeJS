@@ -1,16 +1,17 @@
 class Observable {
-	constructor() {
-		this.subscribers = []
-	}
+  constructor() {
+      this.subscribers = [];
+  }
 
-	// Method to add a subscriber
-	subscribe(fn) {}
+  // Add a subscriber
+  subscribe(callback) {
+      this.subscribers.push(callback);
+  }
 
-	// Method to add a subscriber
-	unsubscribe(fn) {}
-
-	// Method to notify all subscribers
-	notify(data) {}
+  // Notify all subscribers
+  notify(data) {
+      this.subscribers.forEach((callback) => callback(data));
+  }
 }
 
-module.exports = Observable
+module.exports = Observable;

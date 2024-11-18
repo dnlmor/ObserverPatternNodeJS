@@ -1,42 +1,58 @@
-const express = require("express")
-const app = express()
-app.use(express.json())
-const db = require("./db")
-const port = 3000
+const express = require('express');
+const bodyParser = require('body-parser');
+const Observable = require('./Observable');
+const logSubscriber = require('./subscribers/logSubscriber');
+const notifySubscriber = require('./subscribers/notifySubscriber');
+const dbSubscriber = require('./subscribers/dbSubscriber');
+const db = require('./db');
 
-const Observable = require("./Observable")
-const logSubscriber = require("./subscribers/logSubscriber")
-const notifySubscriber = require("./subscribers/notifySubscriber")
-const emailSubscriber = require("./subscribers/emailSubscriber")
-const databaseLogSubscriber = require("./subscribers/databaseLogSubscriber")
+const app = express();
+const port = 3000;
 
-app.post("/", (req, res) => {
-	const { name, createdAt } = req.body
+// Middleware
+app.use(bodyParser.json());
 
-	if (!name || !createdAt) {
-		return res.status(400).json({ message: "Name and createdAt are required" })
-	}
+// Observable instance
+const observable = new Observable();
 
-	const newData = { name, createdAt }
+// Register subscribers
+observable.subscribe(logSubscriber);
+observable.subscribe(notifySubscriber);
+observable.subscribe(dbSubscriber);
 
-	console.log("Resource created:", newData)
+// Endpoints
 
-	// Notify all subscribers
+// POST / - Create a new resource
+app.post('/', (req, res) => {
+    const { name, createdAt } = req.body;
 
-	res.status(201).json({ message: "Resource created", data: newData })
-})
+    if (!name || !createdAt) {
+        return res.status(400).json({ error: 'name and createdAt are required' });
+    }
 
-// Endpoint: Get all resources
-app.get("/", (req, res) => {
-	db.all(`SELECT * FROM resources`, [], (err, rows) => {
-		if (err) {
-			console.error("Error fetching resources:", err.message)
-			return res.status(500).json({ message: "Error fetching resources" })
-		}
-		res.json({ data: rows })
-	})
-})
+    const resource = { name, createdAt };
 
+    // Notify subscribers
+    observable.notify(resource);
+
+    res.status(201).json({
+        message: 'Resource created',
+        data: resource,
+    });
+});
+
+// GET / - Retrieve all resources
+app.get('/', (req, res) => {
+    db.all('SELECT * FROM resources', [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to fetch resources' });
+        }
+
+        res.json({ data: rows });
+    });
+});
+
+// Start server
 app.listen(port, () => {
-	console.log(`Running here ... http://localhost:${port}/`)
-})
+    console.log(`Server running on http://localhost:${port}`);
+});

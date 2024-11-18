@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "nodemon src/index.js"
+		"start": "nodemon src/index.js",
+		"test": "mocha src/tests/*.test.js"
 	},
 	"keywords": [],
 	"author": "",
@@ -11,9 +12,15 @@
 	"description": "",
 	"dependencies": {
 		"express": "^4.21.1",
-		"sqlite3": "^5.1.7"
+		"nodemailer": "^6.9.16",
+		"sqlite3": "^5.1.7",
+		"ws": "^8.18.0"
 	},
 	"devDependencies": {
-		"nodemon": "^3.1.7"
+		"chai": "^5.1.2",
+		"mocha": "^10.8.2",
+		"nodemon": "^3.1.7",
+		"sinon": "^19.0.2",
+		"supertest": "^7.0.0"
 	}
 }
